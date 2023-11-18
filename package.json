@@ -29,6 +29,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.1.16",
     "@nestjs/typeorm": "^10.0.1",
+    "bcrypt": "^5.1.1",
     "class-validator": "^0.14.0",
     "mysql2": "^3.6.3",
     "nest-logger": "^7.0.0",

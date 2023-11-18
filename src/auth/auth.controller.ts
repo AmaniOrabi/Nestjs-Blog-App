@@ -1,42 +1,36 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
-  Delete,
+  Controller,
+  HttpCode,
+  Post,
+  UseInterceptors,
 } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/signin.dto';
-import { UpdateAuthDto } from './dto/signup.dto';
+import { ResponseInterceptor } from 'src/shared/interceptors/response.interceptor';
+import { SignInDto } from './dto/signin.dto';
+import { SignUpDto } from './dto/signup.dto';
 
+@ApiTags('Auth')
+@UseInterceptors(ResponseInterceptor)
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @ApiOperation({
+    summary: 'signup',
+  })
+  @Post('signup')
+  async signup(@Body() body: SignUpDto): Promise<Object> {
+    return await this.authService.signUp(body);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @ApiOperation({
+    summary: 'signing',
+  })
+  @Post('signing')
+  @HttpCode(200)
+  async signing(@Body() body: SignInDto): Promise<Object> {
+    return await this.authService.signIn(body);
   }
 }
