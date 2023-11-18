@@ -39,4 +39,5 @@ export class Blog {
 
   @ManyToMany(() => User, (user) => user.likedBlogs)
   likedByUsers: User[];
+  user: any;
 }

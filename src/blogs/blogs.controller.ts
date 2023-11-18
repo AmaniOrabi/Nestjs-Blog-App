@@ -21,8 +21,9 @@ import { getUser } from 'src/shared/decorators/req-user.decorator';
 import { ResponseInterceptor } from 'src/shared/interceptors/response.interceptor';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import { SearchBlogDto } from './dto/search-blog.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { BlogsService } from './blogs.service';
+import { SearchBlogDto } from './dto/search-blog.dto';
 
 @ApiTags('Blogs')
 @UseInterceptors(ResponseInterceptor)
@@ -44,9 +45,13 @@ export class BlogsController {
   @ApiParam({ name: 'id', required: true })
   @Get('/:id')
   async getBlog(@Param('id') id: string) {
-    return this.blogsService.singleBlog(Number(id));
+    return this.blogsService.getBlog(Number(id));
   }
 
+  @ApiOperation({
+    summary: 'create post',
+    description: `Required Permission: 'ADMIN'`,
+  })
   @ApiOperation({
     summary: 'create blog',
   })

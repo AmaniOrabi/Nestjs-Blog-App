@@ -9,21 +9,40 @@ import { Repository } from 'typeorm';
 import { Blog } from './entities/blog.entity';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { SearchBlogDto } from './dto/search-blog.dto';
 
 @Injectable()
 export class BlogsService {
+  usersService: any;
   constructor(
     @InjectRepository(Blog)
     private readonly blogRepository: Repository<Blog>,
   ) {}
 
-  async getPublicBlogs(query: {
-    title?: string;
-    content?: string;
-  }): Promise<Blog[]> {}
+  async getAllBlogs(search: SearchBlogDto) {
+    const query: any = {};
 
-  async singleBlog(id: number): Promise<Blog> {
-    const blog = await this.blogRepository.findOne(id);
+    if (search.title) {
+      query.title = { contains: search.title };
+    }
+
+    if (search.author) {
+      query.author = { contains: search.author };
+    }
+
+    try {
+      const blogs: Blog[] = await this.blogRepository.find(query);
+
+      return {
+        blogs,
+      };
+    } catch (error: any) {
+      throw error;
+    }
+  }
+
+  async getBlog(id: number): Promise<Blog> {
+    const blog = await this.blogRepository.findOne({ where: { id: id } });
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
@@ -42,7 +61,7 @@ export class BlogsService {
     updateBlogDto: UpdateBlogDto,
   ): Promise<Blog> {
     // Implement logic to update a blog
-    const blog = await this.blogRepository.findOne(id, { relations: ['user'] });
+    const blog = await this.blogRepository.findOne({ where: { id: id } });
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
@@ -62,8 +81,7 @@ export class BlogsService {
   }
 
   async delete(userId: number, id: number): Promise<void> {
-    // Implement logic to delete a blog
-    const blog = await this.blogRepository.findOne(id, { relations: ['user'] });
+    const blog = await this.blogRepository.findOne({ where: { id: id } });
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
