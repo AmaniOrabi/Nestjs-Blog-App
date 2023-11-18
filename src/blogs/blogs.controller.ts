@@ -21,6 +21,7 @@ import { getUser } from 'src/shared/decorators/req-user.decorator';
 import { ResponseInterceptor } from 'src/shared/interceptors/response.interceptor';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { SearchBlogDto } from './dto/search-blog.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Blogs')
@@ -30,16 +31,13 @@ export class BlogsController {
   constructor(private blogsService: BlogsService) {}
 
   @ApiOperation({
-    summary: 'get public Blogs',
+    summary: 'get all Blogs',
   })
   @ApiQuery({ name: 'title', required: false })
-  @ApiQuery({ name: 'content', required: false })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'author', required: false })
   @Get()
-  async getPublicBlogs(@Query() query: searchBlogDto) {
-    // Implement your logic using TypeORM to get public blogs
-    return this.blogsService.getPublicBlogs(query);
+  async getAllBlogs(@Query() query: SearchBlogDto) {
+    return this.blogsService.getAllBlogs(query);
   }
 
   @ApiOperation({ summary: 'get blog by Id' })

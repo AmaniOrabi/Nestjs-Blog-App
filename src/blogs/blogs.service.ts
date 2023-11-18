@@ -11,7 +11,7 @@ import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 
 @Injectable()
-export class BlogService {
+export class BlogsService {
   constructor(
     @InjectRepository(Blog)
     private readonly blogRepository: Repository<Blog>,
@@ -20,8 +20,6 @@ export class BlogService {
   async getPublicBlogs(query: {
     title?: string;
     content?: string;
-    page?: number;
-    limit?: number;
   }): Promise<Blog[]> {}
 
   async singleBlog(id: number): Promise<Blog> {
