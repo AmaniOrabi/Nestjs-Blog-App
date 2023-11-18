@@ -1,11 +1,13 @@
+import { User } from 'src/users/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  //   ManyToOne,
-  //   JoinColumn,
+  ManyToOne,
+  JoinColumn,
+  ManyToMany,
 } from 'typeorm';
 
 @Entity('blogs')
@@ -22,9 +24,9 @@ export class Blog {
   @Column({ nullable: true })
   cover: string;
 
-  //   @ManyToOne(() => User)
-  //   @JoinColumn({ name: 'authorId' })
-  //   author: User;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'authorId' })
+  author: User;
 
   @Column()
   authorId: number;
@@ -34,4 +36,7 @@ export class Blog {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @ManyToMany(() => User, (user) => user.likedBlogs)
+  likedByUsers: User[];
 }

@@ -6,6 +6,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  JoinTable,
+  ManyToMany,
 } from 'typeorm';
 @Entity()
 export class User {
@@ -26,4 +28,8 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @ManyToMany(() => Blog, { cascade: true })
+  @JoinTable()
+  likedBlogs: Blog[];
 }
