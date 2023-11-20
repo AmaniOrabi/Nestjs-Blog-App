@@ -33,10 +33,6 @@ export class UsersService {
     return user;
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return this.userRepository.find();
-  }
-
   async updateUser(id: number, updatedUser: Partial<User>): Promise<User> {
     await this.getUserById(id);
     await this.userRepository.update(id, updatedUser);

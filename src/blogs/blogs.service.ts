@@ -1,5 +1,5 @@
-// blog.service.ts
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -58,10 +58,9 @@ export class BlogsService {
   async update(
     userId: number,
     id: number,
-    updateBlogDto: UpdateBlogDto,
+    updateBlogPayload: UpdateBlogDto,
   ): Promise<Blog> {
-    // Implement logic to update a blog
-    const blog = await this.blogRepository.findOne({ where: { id: id } });
+    const blog = await this.blogRepository.findOne({ where: { id } });
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
@@ -74,14 +73,14 @@ export class BlogsService {
     }
 
     // Update blog properties
-    blog.title = updateBlogDto.title ?? blog.title;
-    blog.content = updateBlogDto.content ?? blog.content;
+    blog.title = updateBlogPayload.title ?? blog.title;
+    blog.content = updateBlogPayload.content ?? blog.content;
 
     return this.blogRepository.save(blog);
   }
 
   async delete(userId: number, id: number): Promise<void> {
-    const blog = await this.blogRepository.findOne({ where: { id: id } });
+    const blog = await this.blogRepository.findOne({ where: { id } });
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
@@ -94,5 +93,19 @@ export class BlogsService {
     }
 
     await this.blogRepository.remove(blog);
+  }
+
+  async likeBlog(userId: number, blogId: number): Promise<Blog> {
+    const user = await this.usersService.getUserById(userId);
+    const blog = await this.getBlog(blogId);
+
+    if (blog.authorId === userId) {
+      throw new BadRequestException('You cannot like your own blog.');
+    }
+
+    blog.likedBy.push(user);
+
+    await this.blogRepository.save(blog);
+    return blog;
   }
 }

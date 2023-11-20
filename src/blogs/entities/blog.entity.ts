@@ -38,6 +38,6 @@ export class Blog {
   updatedAt: Date;
 
   @ManyToMany(() => User, (user) => user.likedBlogs)
-  likedByUsers: User[];
+  likedBy: User[];
   user: any;
 }

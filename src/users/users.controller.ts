@@ -21,11 +21,4 @@ export class UsersController {
   getCurrentUser(@getUser<User>() user: User) {
     return this.usersService.getUserById(user.id);
   }
-
-  @ApiOperation({ summary: 'Get all users' })
-  @ApiTags('All Users')
-  @Get()
-  getAllUsers(): Promise<User[]> {
-    return this.usersService.getAllUsers();
-  }
 }
