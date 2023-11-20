@@ -28,7 +28,7 @@ export class AuthController {
   @Post('signup')
   @ApiResponse({ status: 201, description: 'User successfully created' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  async signup(@Body() body: SignUpDto): Promise<void> {
+  async signup(@Body() body: SignUpDto) {
     await this.authService.signUp(body);
   }
 
@@ -37,7 +37,7 @@ export class AuthController {
   })
   @Post('signing')
   @HttpCode(200)
-  async signing(@Body() body: SignInDto): Promise<Object> {
+  async signing(@Body() body: SignInDto) {
     return await this.authService.signIn(body);
   }
 
@@ -50,7 +50,7 @@ export class AuthController {
   async changePassword(
     @getUser<User>() user: User,
     @Body() body: ChangePasswordDto,
-  ): Promise<Object> {
+  ) {
     return await this.authService.changePassword(user.id, body);
   }
 }

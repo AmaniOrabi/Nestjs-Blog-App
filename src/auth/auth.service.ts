@@ -14,10 +14,12 @@ import { Repository } from 'typeorm';
 import { SignInDto } from './dto/signin.dto';
 import { SignUpDto } from './dto/signup.dto';
 import { ChangePasswordDto } from './dto/changePassword.dto';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
     private configService: ConfigService<Configs>,
