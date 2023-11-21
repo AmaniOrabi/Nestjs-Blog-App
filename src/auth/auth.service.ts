@@ -60,7 +60,7 @@ export class AuthService {
       const passwordIsMatch = await userExist.validatePassword(user.password);
 
       if (!passwordIsMatch)
-        throw new UnauthorizedException('invalid credentials');
+        throw new UnauthorizedException('cinvalid credentials');
       const payload = { sub: userExist.id, username: userExist.username };
       const accessToken = await this.jwtService.signAsync(payload);
 
