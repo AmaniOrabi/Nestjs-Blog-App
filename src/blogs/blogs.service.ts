@@ -10,13 +10,14 @@ import { Blog } from './entities/blog.entity';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { SearchBlogDto } from './dto/search-blog.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class BlogsService {
-  usersService: any;
   constructor(
     @InjectRepository(Blog)
     private readonly blogRepository: Repository<Blog>,
+    private readonly usersService: UsersService,
   ) {}
 
   async getAllBlogs(search: SearchBlogDto) {
@@ -42,16 +43,22 @@ export class BlogsService {
   }
 
   async getBlog(id: number): Promise<Blog> {
-    const blog = await this.blogRepository.findOne({ where: { id: id } });
+    const blog = await this.blogRepository.findOne({ where: { id } });
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
     return blog;
   }
 
-  async create(createBlogDto: CreateBlogDto): Promise<Blog> {
-    const user = await this.usersService.findById(createBlogDto);
-    const blog = this.blogRepository.create({ ...createBlogDto, user });
+  async create(createBlogDto: CreateBlogDto, id?: string): Promise<Blog> {
+    const parsedId = parseInt(id);
+    if (!parsedId) {
+      throw new NotFoundException('User not found');
+    }
+    const blog = this.blogRepository.create({
+      ...createBlogDto,
+      authorId: parsedId,
+    });
     return this.blogRepository.save(blog);
   }
 

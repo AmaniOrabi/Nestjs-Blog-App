@@ -22,14 +22,17 @@ import { getUser } from 'src/shared/decorators/req-user.decorator';
 import { ResponseInterceptor } from 'src/shared/interceptors/response.interceptor';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { BlogsService } from './blogs.service';
 import { SearchBlogDto } from './dto/search-blog.dto';
 import { User } from 'src/users/entities/user.entity';
 import { CanLikeBlogGuard } from 'src/shared/guards/canLikeBlog.guard';
+import { CurrentUserParam } from 'src/auth/params/currentUserParam';
 
 @ApiTags('Blogs')
 @UseInterceptors(ResponseInterceptor)
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('blogs')
 export class BlogsController {
   constructor(private blogsService: BlogsService) {}
@@ -66,11 +69,12 @@ export class BlogsController {
     status: 201,
     description: 'Blog created successfully',
   })
-  @ApiBearerAuth()
   @Post('/')
-  @UseGuards(AuthGuard('jwt'))
-  async createBlog(@Body() createBlogDto: CreateBlogDto) {
-    return this.blogsService.create(createBlogDto);
+  async createBlog(
+    @Body() createBlogDto: CreateBlogDto,
+    @CurrentUserParam() user,
+  ) {
+    return this.blogsService.create(createBlogDto, user?.id);
   }
 
   @ApiOperation({
@@ -84,9 +88,7 @@ export class BlogsController {
     status: 404,
     description: 'Blog not found',
   })
-  @ApiBearerAuth()
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt'))
   async updateBlog(
     @getUser('id') userId: number,
     @Param('id') id: string,
@@ -107,16 +109,14 @@ export class BlogsController {
     description: 'Blog not found',
   })
   @Delete(':id')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
   async deleteBlog(@getUser('id') userId: number, @Param('id') id: string) {
     return this.blogsService.delete(userId, Number(id));
   }
 
   @ApiOperation({ summary: 'Like a blog' })
   @ApiResponse({ status: 200, description: 'Blog liked successfully.' })
-  @Post(':id/like')
   @UseGuards(CanLikeBlogGuard)
+  @Post(':id/like')
   async likeBlog(@getUser<User>() user: User, @Param('id') blogId: number) {
     await this.blogsService.likeBlog(user.id, blogId);
     return { message: 'Blog liked successfully.' };

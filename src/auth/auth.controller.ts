@@ -11,7 +11,7 @@ import { AuthService } from './auth.service';
 import { ResponseInterceptor } from 'src/shared/interceptors/response.interceptor';
 import { SignInDto } from './dto/signin.dto';
 import { SignUpDto } from './dto/signup.dto';
-import { authGuard } from 'src/shared/guards/auth.guard';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { getUser } from 'src/shared/decorators/req-user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { ChangePasswordDto } from './dto/changePassword.dto';
@@ -47,7 +47,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: 'Password changed successfully.' })
   @Post('change-password')
-  @UseGuards(authGuard(true))
+  @UseGuards(AuthGuard)
   @HttpCode(200)
   async changePassword(
     @getUser<User>() user: User,

@@ -1,15 +1,11 @@
 // blogs.guard.ts
 
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { BlogsService } from 'src/blogs/blogs.service';
 
 @Injectable()
 export class CanLikeBlogGuard implements CanActivate {
-  constructor(
-    private reflector: Reflector,
-    private blogsService: BlogsService,
-  ) {}
+  constructor(private blogsService: BlogsService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();

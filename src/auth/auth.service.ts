@@ -61,7 +61,11 @@ export class AuthService {
 
       if (!passwordIsMatch)
         throw new UnauthorizedException('cinvalid credentials');
-      const payload = { sub: userExist.id, username: userExist.username };
+      const payload = {
+        sub: userExist.id,
+        id: userExist.id,
+        username: userExist.username,
+      };
       const accessToken = await this.jwtService.signAsync(payload);
 
       return { access_token: accessToken };

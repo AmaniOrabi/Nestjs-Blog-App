@@ -24,10 +24,6 @@ export class Blog {
   @Column({ nullable: true })
   cover: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'authorId' })
-  author: User;
-
   @Column()
   authorId: number;
 
@@ -36,6 +32,10 @@ export class Blog {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'authorId' })
+  author: User;
 
   @ManyToMany(() => User, (user) => user.likedBlogs)
   likedBy: User[];
