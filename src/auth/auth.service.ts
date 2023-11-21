@@ -3,6 +3,7 @@ import {
   BadRequestException,
   UnauthorizedException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -42,10 +43,8 @@ export class AuthService {
       };
 
       newUser.password = await bcrypt.hash(newUser.password, 10);
-
-      const user = await this.userRepository.create(newUser);
-
-      return this.jwtSignUserId(user.id);
+      const user = this.userRepository.create(newUser);
+      return await this.userRepository.save(user);
     } catch (error) {
       throw error;
     }
@@ -58,16 +57,16 @@ export class AuthService {
       });
       if (!userExist) throw new UnauthorizedException('invalid credentials');
 
-      const passwordIsMatch = await bcrypt.compare(
-        user.password,
-        userExist.password,
-      );
+      const passwordIsMatch = await userExist.validatePassword(user.password);
+
       if (!passwordIsMatch)
         throw new UnauthorizedException('invalid credentials');
+      const payload = { sub: userExist.id, username: userExist.username };
+      const accessToken = await this.jwtService.signAsync(payload);
 
-      return this.jwtSignUserId(userExist.id);
+      return { access_token: accessToken };
     } catch (error) {
-      throw error;
+      throw new InternalServerErrorException('Unexpected error during sign-in');
     }
   }
 

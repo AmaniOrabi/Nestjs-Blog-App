@@ -8,8 +8,8 @@ import {
   OneToMany,
   JoinTable,
   ManyToMany,
-  BeforeInsert,
-  BeforeUpdate,
+  // BeforeInsert,
+  // BeforeUpdate,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
@@ -40,16 +40,16 @@ export class User {
   @JoinTable()
   likedBlogs: Blog[];
 
-  @BeforeInsert()
-  @BeforeUpdate()
-  async hashPassword() {
-    if (this.password) {
-      const saltRounds = 10;
-      this.password = await bcrypt.hash(this.password, saltRounds);
-    }
-  }
+  // @BeforeInsert()
+  // @BeforeUpdate()
+  // async hashPassword() {
+  //   if (this.password) {
+  //     const saltRounds = 10;
+  //     this.password = await bcrypt.hash(this.password, saltRounds);
+  //   }
+  // }
 
-  async comparePassword(candidatePassword: string): Promise<boolean> {
+  async validatePassword(candidatePassword: string): Promise<boolean> {
     return bcrypt.compare(candidatePassword, this.password);
   }
 }

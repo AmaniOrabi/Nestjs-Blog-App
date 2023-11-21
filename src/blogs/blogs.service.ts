@@ -49,8 +49,8 @@ export class BlogsService {
     return blog;
   }
 
-  async create(userId: number, createBlogDto: CreateBlogDto): Promise<Blog> {
-    const user = await this.usersService.findById(userId);
+  async create(createBlogDto: CreateBlogDto): Promise<Blog> {
+    const user = await this.usersService.findById(createBlogDto);
     const blog = this.blogRepository.create({ ...createBlogDto, user });
     return this.blogRepository.save(blog);
   }

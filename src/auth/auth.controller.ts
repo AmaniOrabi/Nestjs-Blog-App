@@ -29,21 +29,23 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'User successfully created' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   async signup(@Body() body: SignUpDto) {
-    await this.authService.signUp(body);
+    return this.authService.signUp(body);
   }
 
   @ApiOperation({
-    summary: 'signing',
+    summary: 'signin',
   })
-  @Post('signing')
+  @Post('signin')
+  @ApiResponse({ status: 200, description: 'Signed in successfully.' })
   @HttpCode(200)
   async signing(@Body() body: SignInDto) {
-    return await this.authService.signIn(body);
+    return this.authService.signIn(body);
   }
 
   @ApiOperation({
     summary: 'change password',
   })
+  @ApiResponse({ status: 200, description: 'Password changed successfully.' })
   @Post('change-password')
   @UseGuards(authGuard(true))
   @HttpCode(200)

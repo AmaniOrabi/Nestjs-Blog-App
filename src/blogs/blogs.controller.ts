@@ -69,11 +69,8 @@ export class BlogsController {
   @ApiBearerAuth()
   @Post('/')
   @UseGuards(AuthGuard('jwt'))
-  async createBlog(
-    @getUser('id') userId: number,
-    @Body() createBlogDto: CreateBlogDto,
-  ) {
-    return this.blogsService.create(userId, createBlogDto);
+  async createBlog(@Body() createBlogDto: CreateBlogDto) {
+    return this.blogsService.create(createBlogDto);
   }
 
   @ApiOperation({
