@@ -8,12 +8,13 @@ import {
   ManyToOne,
   JoinColumn,
   ManyToMany,
+  JoinTable,
 } from 'typeorm';
 
 @Entity('blogs')
 export class Blog {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ length: 350 })
   title: string;
@@ -25,7 +26,7 @@ export class Blog {
   cover: string;
 
   @Column()
-  authorId: number;
+  authorId: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
@@ -38,6 +39,6 @@ export class Blog {
   author: User;
 
   @ManyToMany(() => User, (user) => user.likedBlogs)
+  @JoinTable()
   likedBy: User[];
-  user: any;
 }

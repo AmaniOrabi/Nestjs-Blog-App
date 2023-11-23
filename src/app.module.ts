@@ -7,6 +7,7 @@ import { TypeOrmConfigService } from './shared/config/orm.config';
 import { UsersModule } from './users/users.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { AuthModule } from './auth/auth.module';
+import { LikeModule } from './like/like.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     BlogsModule,
     AuthModule,
+    LikeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

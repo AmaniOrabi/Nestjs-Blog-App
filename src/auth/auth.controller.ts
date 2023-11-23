@@ -12,9 +12,9 @@ import { ResponseInterceptor } from 'src/shared/interceptors/response.intercepto
 import { SignInDto } from './dto/signin.dto';
 import { SignUpDto } from './dto/signup.dto';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
-import { getUser } from 'src/shared/decorators/req-user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { ChangePasswordDto } from './dto/changePassword.dto';
+import { CurrentUserParam } from './params/currentUserParam';
 
 @ApiTags('Auth')
 @UseInterceptors(ResponseInterceptor)
@@ -50,7 +50,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @HttpCode(200)
   async changePassword(
-    @getUser<User>() user: User,
+    @CurrentUserParam() user: User,
     @Body() body: ChangePasswordDto,
   ) {
     return await this.authService.changePassword(user.id, body);

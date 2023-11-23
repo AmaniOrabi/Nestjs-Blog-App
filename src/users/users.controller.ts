@@ -1,10 +1,22 @@
-import { Controller, Get, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { getUser } from 'src/shared/decorators/req-user.decorator';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { ResponseInterceptor } from 'src/shared/interceptors/response.interceptor';
 import { User } from './entities/user.entity';
+import { CurrentUserParam } from 'src/auth/params/currentUserParam';
 
 @ApiBearerAuth()
 @UseInterceptors(ResponseInterceptor)
@@ -17,8 +29,21 @@ export class UsersController {
     summary: 'Get current user',
   })
   @ApiTags('Current User')
-  @Get('/@me')
-  getCurrentUser(@getUser<User>() user: User) {
+  @Get('')
+  getCurrentUser(@CurrentUserParam() user: User) {
     return this.usersService.getUserById(user.id);
+  }
+
+  @ApiOperation({ summary: 'get user by Id' })
+  @ApiParam({ name: 'id', required: true })
+  @ApiResponse({
+    status: 200,
+    description: 'Blog retrieved successfully',
+  })
+  @Get('/:id')
+  async getUser(@Param('id') id: string) {
+    const user = await this.usersService.getUserById(id);
+    delete user.password;
+    return user;
   }
 }

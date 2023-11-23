@@ -15,8 +15,8 @@ import * as bcrypt from 'bcrypt';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   username: string;
@@ -36,18 +36,9 @@ export class User {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToMany(() => Blog, { cascade: true })
+  @ManyToMany(() => Blog, (blog) => blog.likedBy)
   @JoinTable()
   likedBlogs: Blog[];
-
-  // @BeforeInsert()
-  // @BeforeUpdate()
-  // async hashPassword() {
-  //   if (this.password) {
-  //     const saltRounds = 10;
-  //     this.password = await bcrypt.hash(this.password, saltRounds);
-  //   }
-  // }
 
   async validatePassword(candidatePassword: string): Promise<boolean> {
     return bcrypt.compare(candidatePassword, this.password);

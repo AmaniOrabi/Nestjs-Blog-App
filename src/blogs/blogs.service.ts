@@ -1,48 +1,53 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Blog } from './entities/blog.entity';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import { SearchBlogDto } from './dto/search-blog.dto';
 import { UsersService } from 'src/users/users.service';
+import { LikeService } from 'src/like/like.service';
 
 @Injectable()
 export class BlogsService {
+  blogService: BlogsService;
   constructor(
     @InjectRepository(Blog)
     private readonly blogRepository: Repository<Blog>,
     private readonly usersService: UsersService,
+    private readonly likeService: LikeService,
   ) {}
 
-  async getAllBlogs(search: SearchBlogDto) {
-    const query: any = {};
-
-    if (search.title) {
-      query.title = { contains: search.title };
-    }
-
-    if (search.author) {
-      query.author = { contains: search.author };
-    }
-
+  async getAllBlogs(userId: string) {
     try {
-      const blogs: Blog[] = await this.blogRepository.find(query);
+      const blogs: Blog[] = await this.blogRepository.find({
+        where: {
+          authorId: Not(userId),
+        },
+      });
 
       return {
-        blogs,
+        blogs: await Promise.all(
+          blogs.map(async (blog) => {
+            const likedByUser = await this.likeService.getUserLikesBlog(
+              blog.id,
+              userId,
+            );
+            const likeCount = await this.likeService.getBlogLikeCount(blog.id);
+
+            return {
+              ...blog,
+              likedByUser,
+              likeCount,
+            };
+          }),
+        ),
       };
     } catch (error: any) {
       throw error;
     }
   }
 
-  async getBlog(id: number): Promise<Blog> {
+  async getBlogById(id: string): Promise<Blog> {
     const blog = await this.blogRepository.findOne({ where: { id } });
     if (!blog) {
       throw new NotFoundException('Blog not found');
@@ -50,34 +55,34 @@ export class BlogsService {
     return blog;
   }
 
-  async create(createBlogDto: CreateBlogDto, id?: string): Promise<Blog> {
-    const parsedId = parseInt(id);
-    if (!parsedId) {
-      throw new NotFoundException('User not found');
-    }
-    const blog = this.blogRepository.create({
-      ...createBlogDto,
-      authorId: parsedId,
-    });
-    return this.blogRepository.save(blog);
-  }
-
-  async update(
-    userId: number,
-    id: number,
-    updateBlogPayload: UpdateBlogDto,
-  ): Promise<Blog> {
+  async getDetailedBlogById(id: string, userId: string) {
     const blog = await this.blogRepository.findOne({ where: { id } });
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
+    const likedByUser = await this.likeService.getUserLikesBlog(id, userId);
+    const likeCount = await this.likeService.getBlogLikeCount(id);
 
-    // Check if the user owns the blog
-    if (blog.user.id !== userId) {
-      throw new ForbiddenException(
-        'You do not have permission to update this blog',
-      );
+    return {
+      ...blog,
+      likedByUser,
+      likeCount,
+    };
+  }
+
+  async create(createBlogDto: CreateBlogDto, id?: string): Promise<Blog> {
+    if (!id) {
+      throw new NotFoundException('User not found');
     }
+    const blog = this.blogRepository.create({
+      ...createBlogDto,
+      authorId: id,
+    });
+    return this.blogRepository.save(blog);
+  }
+
+  async update(id: string, updateBlogPayload: UpdateBlogDto): Promise<Blog> {
+    const blog = await this.getBlogById(id);
 
     // Update blog properties
     blog.title = updateBlogPayload.title ?? blog.title;
@@ -86,33 +91,25 @@ export class BlogsService {
     return this.blogRepository.save(blog);
   }
 
-  async delete(userId: number, id: number): Promise<void> {
-    const blog = await this.blogRepository.findOne({ where: { id } });
-    if (!blog) {
-      throw new NotFoundException('Blog not found');
-    }
-
-    // Check if the user owns the blog
-    if (blog.user.id !== userId) {
-      throw new ForbiddenException(
-        'You do not have permission to delete this blog',
-      );
-    }
+  async delete(id: string): Promise<void> {
+    const blog = await this.blogService.getBlogById(id);
 
     await this.blogRepository.remove(blog);
   }
 
-  async likeBlog(userId: number, blogId: number): Promise<Blog> {
+  async toggleLikeBlog(userId: string, blogId: string): Promise<void> {
+    const blog = await this.getBlogById(blogId);
     const user = await this.usersService.getUserById(userId);
-    const blog = await this.getBlog(blogId);
+    await this.likeService.toggleLike(blog, user);
+  }
 
-    if (blog.authorId === userId) {
-      throw new BadRequestException('You cannot like your own blog.');
-    }
+  async ownsBlog(userId: string, blogId: string): Promise<boolean> {
+    const blog = await this.getBlogById(blogId);
+    return !blog || blog.authorId === userId;
+  }
 
-    blog.likedBy.push(user);
-
-    await this.blogRepository.save(blog);
-    return blog;
+  async canLikeBlog(userId: string, blogId: string): Promise<boolean> {
+    const blog = await this.getBlogById(blogId);
+    return !blog || blog.authorId !== userId;
   }
 }

@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,16 +17,14 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { getUser } from 'src/shared/decorators/req-user.decorator';
 import { ResponseInterceptor } from 'src/shared/interceptors/response.interceptor';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { BlogsService } from './blogs.service';
-import { SearchBlogDto } from './dto/search-blog.dto';
 import { User } from 'src/users/entities/user.entity';
-import { CanLikeBlogGuard } from 'src/shared/guards/canLikeBlog.guard';
 import { CurrentUserParam } from 'src/auth/params/currentUserParam';
+import { BlogOwnerGuard } from './guards/blogOwner.guard';
 
 @ApiTags('Blogs')
 @UseInterceptors(ResponseInterceptor)
@@ -47,8 +44,8 @@ export class BlogsController {
     description: 'List of blogs retrieved successfully',
   })
   @Get()
-  async getAllBlogs(@Query() query: SearchBlogDto) {
-    return this.blogsService.getAllBlogs(query);
+  async getAllBlogs(@CurrentUserParam() user) {
+    return this.blogsService.getAllBlogs(user.id);
   }
 
   @ApiOperation({ summary: 'get blog by Id' })
@@ -58,8 +55,8 @@ export class BlogsController {
     description: 'Blog retrieved successfully',
   })
   @Get('/:id')
-  async getBlog(@Param('id') id: string) {
-    return this.blogsService.getBlog(Number(id));
+  async getBlog(@Param('id') id: string, @CurrentUserParam() user) {
+    return this.blogsService.getDetailedBlogById(id, user.id);
   }
 
   @ApiOperation({
@@ -88,13 +85,13 @@ export class BlogsController {
     status: 404,
     description: 'Blog not found',
   })
-  @Patch(':id')
+  @Patch('/:id')
+  @UseGuards(BlogOwnerGuard)
   async updateBlog(
-    @getUser('id') userId: number,
     @Param('id') id: string,
     @Body() updateBlogDto: UpdateBlogDto,
   ) {
-    return this.blogsService.update(userId, Number(id), updateBlogDto);
+    return this.blogsService.update(id, updateBlogDto);
   }
 
   @ApiOperation({
@@ -108,17 +105,17 @@ export class BlogsController {
     status: 404,
     description: 'Blog not found',
   })
-  @Delete(':id')
-  async deleteBlog(@getUser('id') userId: number, @Param('id') id: string) {
-    return this.blogsService.delete(userId, Number(id));
+  @Delete('/:id')
+  @UseGuards(BlogOwnerGuard)
+  async deleteBlog(@Param('id') id: string) {
+    return this.blogsService.delete(id);
   }
 
   @ApiOperation({ summary: 'Like a blog' })
   @ApiResponse({ status: 200, description: 'Blog liked successfully.' })
-  @UseGuards(CanLikeBlogGuard)
-  @Post(':id/like')
-  async likeBlog(@getUser<User>() user: User, @Param('id') blogId: number) {
-    await this.blogsService.likeBlog(user.id, blogId);
+  @Post('/like/:id')
+  async likeBlog(@CurrentUserParam() user: User, @Param('id') blogId: string) {
+    await this.blogsService.toggleLikeBlog(user.id, blogId);
     return { message: 'Blog liked successfully.' };
   }
 }

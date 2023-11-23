@@ -74,7 +74,7 @@ export class AuthService {
     }
   }
 
-  async changePassword(userId: number, changePasswordDto: ChangePasswordDto) {
+  async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
     try {
       const user = await this.userRepository.findOne({ where: { id: userId } });
 
@@ -98,7 +98,7 @@ export class AuthService {
     }
   }
 
-  private jwtSignUserId(userId: number): string {
+  private jwtSignUserId(userId: string): string {
     return this.jwtService.sign(
       { userId },
       {
