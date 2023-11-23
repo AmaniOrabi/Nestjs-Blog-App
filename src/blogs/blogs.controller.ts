@@ -95,7 +95,7 @@ export class BlogsController {
     description: 'Blog not found',
   })
   @Patch('/:id')
-  // @UseGuards(BlogOwnerGuard)
+  @UseGuards(BlogOwnerGuard)
   async updateBlog(
     @Param('id') id: string,
     @Body() updateBlogDto: UpdateBlogDto,
