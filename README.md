@@ -14,7 +14,7 @@
 <ul>
     <li> <img alt="ts"  src="https://skillicons.dev/icons?i=ts" width="20" height="20" /> TypeScript</li>
     <li> <img alt="nest"  src="https://skillicons.dev/icons?i=nest" width="20" height="20" /> NestJS </li>
-    <li> <img alt="prisma"  src="https://skillicons.dev/icons?i=prisma" width="20" height="20" /> TypeORM </li>
+    <li> <img alt="typeorm"  src="https://github.com/typeorm/typeorm/raw/master/resources/logo_big.png" width="20" height="20" />  TypeORM </li>
     <li> 📒 Swagger </li>
 </ul>
 
