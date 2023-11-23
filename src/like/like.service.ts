@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Like } from './entities/like.entity';
@@ -48,5 +48,21 @@ export class LikeService {
       },
     });
     return blogs.length;
+  }
+
+  async deleteLikesByBlogId(blogId: string): Promise<void> {
+    try {
+      const likes = await this.likeRepository.find({
+        where: {
+          blog: { id: blogId },
+        },
+      });
+
+      await Promise.all(
+        likes.map(async (like) => this.likeRepository.remove(like)),
+      );
+    } catch (error) {
+      throw new NotFoundException('Likes not found');
+    }
   }
 }

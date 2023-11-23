@@ -35,8 +35,7 @@ export class AuthService {
         ],
       });
 
-      if (usersExist)
-        throw new BadRequestException('Email or username already exist');
+      if (usersExist) throw new BadRequestException('Invalid credentials');
 
       const newUser = {
         ...userPayload,
@@ -60,7 +59,7 @@ export class AuthService {
       const passwordIsMatch = await userExist.validatePassword(user.password);
 
       if (!passwordIsMatch)
-        throw new UnauthorizedException('cinvalid credentials');
+        throw new UnauthorizedException('Invalid credentials');
       const payload = {
         sub: userExist.id,
         id: userExist.id,

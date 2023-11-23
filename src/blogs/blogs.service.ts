@@ -47,6 +47,35 @@ export class BlogsService {
     }
   }
 
+  async getMyBlogs(userId: string) {
+    try {
+      const blogs: Blog[] = await this.blogRepository.find({
+        where: {
+          authorId: userId,
+        },
+      });
+      return {
+        blogs: await Promise.all(
+          blogs.map(async (blog) => {
+            const likedByUser = await this.likeService.getUserLikesBlog(
+              blog.id,
+              userId,
+            );
+            const likeCount = await this.likeService.getBlogLikeCount(blog.id);
+
+            return {
+              ...blog,
+              likedByUser,
+              likeCount,
+            };
+          }),
+        ),
+      };
+    } catch (error: any) {
+      throw error;
+    }
+  }
+
   async getBlogById(id: string): Promise<Blog> {
     const blog = await this.blogRepository.findOne({ where: { id } });
     if (!blog) {
@@ -92,9 +121,14 @@ export class BlogsService {
   }
 
   async delete(id: string): Promise<void> {
-    const blog = await this.blogService.getBlogById(id);
-
-    await this.blogRepository.remove(blog);
+    try {
+      const blog = await this.getBlogById(id);
+      await this.likeService.deleteLikesByBlogId(id);
+      await this.blogRepository.delete(blog.id);
+    } catch (error) {
+      console.error('Error deleting blog:', error);
+      throw error;
+    }
   }
 
   async toggleLikeBlog(userId: string, blogId: string): Promise<void> {

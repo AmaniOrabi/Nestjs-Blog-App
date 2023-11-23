@@ -13,7 +13,6 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -37,8 +36,6 @@ export class BlogsController {
   @ApiOperation({
     summary: 'get all Blogs',
   })
-  @ApiQuery({ name: 'title', required: false })
-  @ApiQuery({ name: 'author', required: false })
   @ApiResponse({
     status: 200,
     description: 'List of blogs retrieved successfully',
@@ -46,6 +43,18 @@ export class BlogsController {
   @Get()
   async getAllBlogs(@CurrentUserParam() user) {
     return this.blogsService.getAllBlogs(user.id);
+  }
+
+  @ApiOperation({
+    summary: 'get my Blogs',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of blogs retrieved successfully',
+  })
+  @Get('/my-blogs')
+  async getMyBlogs(@CurrentUserParam() user) {
+    return this.blogsService.getMyBlogs(user.id);
   }
 
   @ApiOperation({ summary: 'get blog by Id' })
@@ -86,7 +95,7 @@ export class BlogsController {
     description: 'Blog not found',
   })
   @Patch('/:id')
-  @UseGuards(BlogOwnerGuard)
+  // @UseGuards(BlogOwnerGuard)
   async updateBlog(
     @Param('id') id: string,
     @Body() updateBlogDto: UpdateBlogDto,
